@@ -73,6 +73,7 @@ import io.reactivex.rxjava3.disposables.Disposable;
  * @param <T>
  *          the type of item the Observer expects to observe
  */
+// 订阅者的抽象接口
 public interface Observer<@NonNull T> {
 
     /**

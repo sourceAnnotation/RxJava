@@ -21,6 +21,9 @@ import io.reactivex.rxjava3.operators.ScalarSupplier;
  * Represents a constant scalar value.
  * @param <T> the value type
  */
+// Observable的一个子类
+// 被订阅后会自动执行subscribeActual方法
+// 只需要给观察者发送一个value值（调用Observer的onSubscribe方法）
 public final class ObservableJust<T> extends Observable<T> implements ScalarSupplier<T> {
 
     private final T value;
@@ -31,6 +34,7 @@ public final class ObservableJust<T> extends Observable<T> implements ScalarSupp
     @Override
     protected void subscribeActual(Observer<? super T> observer) {
         ScalarDisposable<T> sd = new ScalarDisposable<>(observer, value);
+        // 调用监听者的onSubscribe方法，将Disposable传给监听者
         observer.onSubscribe(sd);
         sd.run();
     }

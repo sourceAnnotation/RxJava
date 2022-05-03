@@ -22,9 +22,11 @@ import io.reactivex.rxjava3.internal.fuseable.HasUpstreamObservableSource;
  * @param <T> the input source type
  * @param <U> the output type
  */
+// 一个抽象的有上游的Observable
 abstract class AbstractObservableWithUpstream<T, U> extends Observable<U> implements HasUpstreamObservableSource<T> {
 
     /** The source consumable Observable. */
+    // 上游的ObservableSource
     protected final ObservableSource<T> source;
 
     /**

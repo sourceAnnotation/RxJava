@@ -2643,6 +2643,7 @@ public abstract class Observable<@NonNull T> implements ObservableSource<T> {
     @CheckReturnValue
     @NonNull
     @SchedulerSupport(SchedulerSupport.NONE)
+    // 工厂方法，生产一个Observable的子类-ObservableJust
     public static <@NonNull T> Observable<T> just(@NonNull T item) {
         Objects.requireNonNull(item, "item is null");
         return RxJavaPlugins.onAssembly(new ObservableJust<>(item));
@@ -10373,6 +10374,9 @@ public abstract class Observable<@NonNull T> implements ObservableSource<T> {
     @NonNull
     public final <@NonNull R> Observable<R> map(@NonNull Function<? super T, ? extends R> mapper) {
         Objects.requireNonNull(mapper, "mapper is null");
+        // 返回一个新的Observable，ObservableMap
+        // ObservableMap是上游的订阅者
+        // ObservableMap是下游的发布者
         return RxJavaPlugins.onAssembly(new ObservableMap<>(this, mapper));
     }
 
@@ -10611,6 +10615,7 @@ public abstract class Observable<@NonNull T> implements ObservableSource<T> {
     @CheckReturnValue
     @SchedulerSupport(SchedulerSupport.CUSTOM)
     @NonNull
+    // 指定下游的运行线程
     public final Observable<T> observeOn(@NonNull Scheduler scheduler, boolean delayError, int bufferSize) {
         Objects.requireNonNull(scheduler, "scheduler is null");
         ObjectHelper.verifyPositive(bufferSize, "bufferSize");
@@ -13166,6 +13171,7 @@ public abstract class Observable<@NonNull T> implements ObservableSource<T> {
 
     @SchedulerSupport(SchedulerSupport.NONE)
     @Override
+    // 被Observer订阅
     public final void subscribe(@NonNull Observer<? super T> observer) {
         Objects.requireNonNull(observer, "observer is null");
         try {
@@ -13173,6 +13179,7 @@ public abstract class Observable<@NonNull T> implements ObservableSource<T> {
 
             Objects.requireNonNull(observer, "The RxJavaPlugins.onSubscribe hook returned a null Observer. Please change the handler provided to RxJavaPlugins.setOnObservableSubscribe for invalid null returns. Further reading: https://github.com/ReactiveX/RxJava/wiki/Plugins");
 
+            // 模板方法模式，子类实现subscribeActual方法，不需要关注异常
             subscribeActual(observer);
         } catch (NullPointerException e) { // NOPMD
             throw e;
@@ -13196,6 +13203,8 @@ public abstract class Observable<@NonNull T> implements ObservableSource<T> {
      * applied by {@link #subscribe(Observer)} before this method gets called.
      * @param observer the incoming {@code Observer}, never {@code null}
      */
+    // 抽象方法，让子类去实现
+    // 模版方法模式
     protected abstract void subscribeActual(@NonNull Observer<? super T> observer);
 
     /**
@@ -13250,6 +13259,7 @@ public abstract class Observable<@NonNull T> implements ObservableSource<T> {
     @CheckReturnValue
     @SchedulerSupport(SchedulerSupport.CUSTOM)
     @NonNull
+    // 切换上游的执行线程
     public final Observable<T> subscribeOn(@NonNull Scheduler scheduler) {
         Objects.requireNonNull(scheduler, "scheduler is null");
         return RxJavaPlugins.onAssembly(new ObservableSubscribeOn<>(this, scheduler));

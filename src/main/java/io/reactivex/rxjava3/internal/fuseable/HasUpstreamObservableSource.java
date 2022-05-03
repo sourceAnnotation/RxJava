@@ -22,6 +22,7 @@ import io.reactivex.rxjava3.core.ObservableSource;
  *
  * @param <T> the value type
  */
+// 有上游ObservableSource的抽象类接口
 public interface HasUpstreamObservableSource<@NonNull T> {
     /**
      * Returns the upstream source of this Observable.
@@ -29,5 +30,6 @@ public interface HasUpstreamObservableSource<@NonNull T> {
      * @return the source ObservableSource
      */
     @NonNull
+    // 获取上游的ObservableSource
     ObservableSource<T> source();
 }

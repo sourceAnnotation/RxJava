@@ -25,6 +25,9 @@ import io.reactivex.rxjava3.plugins.RxJavaPlugins;
  * @param <T> the upstream value type
  * @param <R> the downstream value type
  */
+// 中间的observer
+// 有一个下游的Observer（downstream）
+// 上游的Observable调用它的onSubscribe时，会传递上游的Disposable
 public abstract class BasicFuseableObserver<T, R> implements Observer<T>, QueueDisposable<R> {
 
     /** The downstream subscriber. */
@@ -53,6 +56,7 @@ public abstract class BasicFuseableObserver<T, R> implements Observer<T>, QueueD
     // final: fixed protocol steps to support fuseable and non-fuseable upstream
     @SuppressWarnings("unchecked")
     @Override
+    // 被上游的Observable调用，传递了上游的Disposable
     public final void onSubscribe(Disposable d) {
         if (DisposableHelper.validate(this.upstream, d)) {
 
@@ -63,6 +67,7 @@ public abstract class BasicFuseableObserver<T, R> implements Observer<T>, QueueD
 
             if (beforeDownstream()) {
 
+                // 调用下游的onSubscribe
                 downstream.onSubscribe(this);
 
                 afterDownstream();
@@ -149,6 +154,7 @@ public abstract class BasicFuseableObserver<T, R> implements Observer<T>, QueueD
 
     @Override
     public void dispose() {
+        // 被下游调用dispose后，直接调用上游的dispose
         upstream.dispose();
     }
 

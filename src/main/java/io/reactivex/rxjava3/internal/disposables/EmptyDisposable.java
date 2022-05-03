@@ -25,21 +25,25 @@ import io.reactivex.rxjava3.operators.QueueDisposable;
  * don't use it in tests and then signal onNext with it;
  * use Disposables.empty() instead.
  */
+// 单例模式的java枚举写法
 public enum EmptyDisposable implements QueueDisposable<Object> {
     /**
      * Since EmptyDisposable implements QueueDisposable and is empty,
      * don't use it in tests and then signal onNext with it;
      * use Disposables.empty() instead.
      */
+    // isDisposed方法永远返回true
     INSTANCE,
     /**
      * An empty disposable that returns false for isDisposed.
      */
+    // isDisposed方法永远返回false
     NEVER
     ;
 
     @Override
     public void dispose() {
+        // dispose的时候什么也不做
         // no-op
     }
 

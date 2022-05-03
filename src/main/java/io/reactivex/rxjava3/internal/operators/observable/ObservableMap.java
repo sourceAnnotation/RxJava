@@ -20,9 +20,13 @@ import io.reactivex.rxjava3.internal.observers.BasicFuseableObserver;
 
 import java.util.Objects;
 
+// 有上游的Observable
+// 将上游的T类型的数据，通过function方法，转换成U类型的数据
 public final class ObservableMap<T, U> extends AbstractObservableWithUpstream<T, U> {
     final Function<? super T, ? extends U> function;
 
+    // 将上游的ObservableSource包裹起来📦
+    // 隔离下游与上游的联系
     public ObservableMap(ObservableSource<T> source, Function<? super T, ? extends U> function) {
         super(source);
         this.function = function;
@@ -30,6 +34,13 @@ public final class ObservableMap<T, U> extends AbstractObservableWithUpstream<T,
 
     @Override
     public void subscribeActual(Observer<? super U> t) {
+        // 中间层承上启下的作用
+        // 下游调用subscribe方法时传递了下游的Observer
+        // 中间层包裹这个Observer -> MapObserver
+        // 将MapObserver传递给上游
+        // 偷梁换柱，将下游的Observer换成了自己的MapObserver
+        // 上游调用onNext的时候，MapObserver会将value值进行map转换
+        // 转换后的结果再传递给下游的onNext
         source.subscribe(new MapObserver<T, U>(t, function));
     }
 
@@ -55,11 +66,13 @@ public final class ObservableMap<T, U> extends AbstractObservableWithUpstream<T,
             U v;
 
             try {
+                // 转换value值
                 v = Objects.requireNonNull(mapper.apply(t), "The mapper function returned a null value.");
             } catch (Throwable ex) {
                 fail(ex);
                 return;
             }
+            // 将转换后的值传递给下游
             downstream.onNext(v);
         }
 

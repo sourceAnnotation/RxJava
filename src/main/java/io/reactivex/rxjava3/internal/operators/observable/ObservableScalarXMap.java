@@ -173,6 +173,9 @@ public final class ObservableScalarXMap {
      *
      * @param <T> the value type
      */
+    // 是一个AtomicInteger，使用CAS保证多线程安全
+    // 是一个Runnable，可以被run
+    // 是一个Disposable，可以被取消执行
     public static final class ScalarDisposable<T>
     extends AtomicInteger
     implements QueueDisposable<T>, Runnable {
@@ -225,11 +228,15 @@ public final class ObservableScalarXMap {
 
         @Override
         public void dispose() {
+            // 取消执行
+            // 将状态设置为ON_COMPLETE
             set(ON_COMPLETE);
         }
 
         @Override
         public boolean isDisposed() {
+            // 判断是否被取消
+            // 判断状态是否是ON_COMPLETE
             return get() == ON_COMPLETE;
         }
 
@@ -244,10 +251,13 @@ public final class ObservableScalarXMap {
 
         @Override
         public void run() {
+            // 保证run只会执行一次（使用CAS原子操作）
             if (get() == START && compareAndSet(START, ON_NEXT)) {
+                // 执行观察者的onNext方法
                 observer.onNext(value);
                 if (get() == ON_NEXT) {
                     lazySet(ON_COMPLETE);
+                    // 执行观察者的onComplete方法
                     observer.onComplete();
                 }
             }

@@ -25,6 +25,8 @@ import java.util.concurrent.Future;
 /**
  * Represents a disposable resource.
  */
+// 订阅的句柄
+// 可以取消订阅、可以查询订阅状态（订阅是否被取消）
 public interface Disposable {
     /**
      * Dispose the resource, the operation should be idempotent.

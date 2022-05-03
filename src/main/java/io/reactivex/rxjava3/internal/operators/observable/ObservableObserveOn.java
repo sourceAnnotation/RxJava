@@ -43,6 +43,7 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
         } else {
             Scheduler.Worker w = scheduler.createWorker();
 
+            // 将下游的 observer 封装成 ObserveOnObserver，传递给上游
             source.subscribe(new ObserveOnObserver<>(observer, w, delayError, bufferSize));
         }
     }
@@ -79,6 +80,7 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
         @Override
         public void onSubscribe(Disposable d) {
             if (DisposableHelper.validate(this.upstream, d)) {
+                // 保存上游的 Disposable
                 this.upstream = d;
                 if (d instanceof QueueDisposable) {
                     @SuppressWarnings("unchecked")
@@ -104,6 +106,7 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
 
                 queue = new SpscLinkedArrayQueue<>(bufferSize);
 
+                // ⚠️下游的 onSubscribe 方法并没有切换线程
                 downstream.onSubscribe(this);
             }
         }
@@ -117,6 +120,8 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
             if (sourceMode != QueueDisposable.ASYNC) {
                 queue.offer(t);
             }
+
+            // 切换线程，执行下游的 onNext
             schedule();
         }
 
@@ -159,6 +164,7 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
 
         void schedule() {
             if (getAndIncrement() == 0) {
+                // 切换线程，执行 run 方法
                 worker.schedule(this);
             }
         }
@@ -199,6 +205,7 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
                         break;
                     }
 
+                    // 执行下游的 onNext
                     a.onNext(v);
                 }
 
@@ -248,6 +255,7 @@ public final class ObservableObserveOn<T> extends AbstractObservableWithUpstream
             }
         }
 
+        // 线程切换以后，执行该方法
         @Override
         public void run() {
             if (outputFused) {
